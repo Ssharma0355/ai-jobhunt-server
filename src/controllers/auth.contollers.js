@@ -1,4 +1,6 @@
 const userModel = require("../models/user.model")
+const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
 
 async function registerUserController(req, res) {
 
@@ -18,7 +20,24 @@ async function registerUserController(req, res) {
         })
     }
 
-    
+    const hash = await userModel.create({
+        username,
+        email,
+        password: hash
+    })
+
+    const token =  jwt.sign(
+        {id: user._id, username: user.username, },
+        process.env.JWT_Token,
+        {
+            expiresIn:"1d"
+        }
+    )
+    res.cookie("token", token)
+    res.status(201).json({
+        message:"User Registered successfully"
+    })
+
 }
 
 module.exports = { registerUserController }
